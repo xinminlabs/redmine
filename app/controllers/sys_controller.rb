@@ -51,7 +51,7 @@ class SysController < ActionController::Base
       if params[:id].to_s =~ /^\d*$/
         project = scope.find(params[:id])
       else
-        project = scope.find_by_identifier(params[:id])
+        project = scope.where(identifier: params[:id]).first
       end
       raise ActiveRecord::RecordNotFound unless project
       projects << project

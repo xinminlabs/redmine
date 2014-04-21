@@ -105,7 +105,7 @@ class WikiPage < ActiveRecord::Base
 
   def content_for_version(version=nil)
     if content
-      result = content.versions.find_by_version(version.to_i) if version
+      result = content.versions.where(version: version.to_i).first if version
       result ||= content
       result
     end
@@ -113,8 +113,8 @@ class WikiPage < ActiveRecord::Base
 
   def diff(version_to=nil, version_from=nil)
     version_to = version_to ? version_to.to_i : self.content.version
-    content_to = content.versions.find_by_version(version_to)
-    content_from = version_from ? content.versions.find_by_version(version_from.to_i) : content_to.try(:previous)
+    content_to = content.versions.where(version: version_to).first
+    content_from = version_from ? content.versions.where(version: version_from.to_i).first : content_to.try(:previous)
     return nil unless content_to && content_from
 
     if content_from.version > content_to.version
@@ -126,7 +126,7 @@ class WikiPage < ActiveRecord::Base
 
   def annotate(version=nil)
     version = version ? version.to_i : self.content.version
-    c = content.versions.find_by_version(version)
+    c = content.versions.where(version: version).first
     c ? WikiAnnotate.new(c) : nil
   end
 

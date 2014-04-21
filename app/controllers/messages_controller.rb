@@ -117,7 +117,7 @@ class MessagesController < ApplicationController
   end
 
   def preview
-    message = @board.messages.find_by_id(params[:id])
+    message = @board.messages.find(params[:id])
     @text = (params[:message] || params[:reply])[:content]
     @previewed = message
     render :partial => 'common/preview'

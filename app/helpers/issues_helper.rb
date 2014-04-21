@@ -332,11 +332,11 @@ module IssuesHelper
       label = l(:label_attachment)
     when 'relation'
       if detail.value && !detail.old_value
-        rel_issue = Issue.visible.find_by_id(detail.value)
+        rel_issue = Issue.visible.find(detail.value)
         value = rel_issue.nil? ? "#{l(:label_issue)} ##{detail.value}" :
                   (no_html ? rel_issue : link_to_issue(rel_issue, :only_path => options[:only_path]))
       elsif detail.old_value && !detail.value
-        rel_issue = Issue.visible.find_by_id(detail.old_value)
+        rel_issue = Issue.visible.find(detail.old_value)
         old_value = rel_issue.nil? ? "#{l(:label_issue)} ##{detail.old_value}" :
                           (no_html ? rel_issue : link_to_issue(rel_issue, :only_path => options[:only_path]))
       end
@@ -356,7 +356,7 @@ module IssuesHelper
       if detail.old_value && detail.value.blank? && detail.property != 'relation'
         old_value = content_tag("del", old_value)
       end
-      if detail.property == 'attachment' && !value.blank? && atta = Attachment.find_by_id(detail.prop_key)
+      if detail.property == 'attachment' && !value.blank? && atta = Attachment.find(detail.prop_key)
         # Link to the attachment if it has not been removed
         value = link_to_attachment(atta, :download => true, :only_path => options[:only_path])
         if options[:only_path] != false && atta.is_text?
@@ -406,7 +406,7 @@ module IssuesHelper
     end
     association = Issue.reflect_on_association(field.to_sym)
     if association
-      record = association.class_name.constantize.find_by_id(id)
+      record = association.class_name.constantize.find(id)
       if record
         record.name.force_encoding('UTF-8') if record.name.respond_to?(:force_encoding)
         return record.name

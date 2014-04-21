@@ -316,7 +316,7 @@ class IssuesController < ApplicationController
       when 'nullify'
         TimeEntry.where(['issue_id IN (?)', @issues]).update_all('issue_id = NULL')
       when 'reassign'
-        reassign_to = @project.issues.find_by_id(params[:reassign_to_id])
+        reassign_to = @project.issues.find(params[:reassign_to_id])
         if reassign_to.nil?
           flash.now[:error] = l(:error_issue_not_found_in_project)
           return

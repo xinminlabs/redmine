@@ -21,7 +21,7 @@ class JournalDetail < ActiveRecord::Base
 
   def custom_field
     if property == 'cf'
-      @custom_field ||= CustomField.find_by_id(prop_key)
+      @custom_field ||= CustomField.find(prop_key)
     end
   end
 

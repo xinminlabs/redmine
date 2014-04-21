@@ -43,23 +43,21 @@ class Repository::Cvs < Repository
   end
 
   def entry(path=nil, identifier=nil)
-    rev = identifier.nil? ? nil : changesets.find_by_revision(identifier)
+    rev = identifier.nil? ? nil : changesets.where(revision: identifier).first
     scm.entry(path, rev.nil? ? nil : rev.committed_on)
   end
 
   def scm_entries(path=nil, identifier=nil)
     rev = nil
     if ! identifier.nil?
-      rev = changesets.find_by_revision(identifier)
+      rev = changesets.where(revision: identifier).first
       return nil if rev.nil?
     end
     entries = scm.entries(path, rev.nil? ? nil : rev.committed_on)
     if entries
       entries.each() do |entry|
         if ( ! entry.lastrev.nil? ) && ( ! entry.lastrev.revision.nil? )
-          change = filechanges.find_by_revision_and_path(
-                     entry.lastrev.revision,
-                     scm.with_leading_slash(entry.path) )
+          change = filechanges.where(revision: entry.lastrev.revision, path: scm.with_leading_slash(entry.path)).first
           if change
             entry.lastrev.identifier = change.changeset.revision
             entry.lastrev.revision   = change.changeset.revision
@@ -76,7 +74,7 @@ class Repository::Cvs < Repository
   def cat(path, identifier=nil)
     rev = nil
     if ! identifier.nil?
-      rev = changesets.find_by_revision(identifier)
+      rev = changesets.where(revision: identifier).first
       return nil if rev.nil?
     end
     scm.cat(path, rev.nil? ? nil : rev.committed_on)
@@ -85,7 +83,7 @@ class Repository::Cvs < Repository
   def annotate(path, identifier=nil)
     rev = nil
     if ! identifier.nil?
-      rev = changesets.find_by_revision(identifier)
+      rev = changesets.where(revision: identifier).first
       return nil if rev.nil?
     end
     scm.annotate(path, rev.nil? ? nil : rev.committed_on)
@@ -94,9 +92,9 @@ class Repository::Cvs < Repository
   def diff(path, rev, rev_to)
     # convert rev to revision. CVS can't handle changesets here
     diff=[]
-    changeset_from = changesets.find_by_revision(rev)
+    changeset_from = changesets.where(revision: rev).first
     if rev_to.to_i > 0
-      changeset_to = changesets.find_by_revision(rev_to)
+      changeset_to = changesets.where(revision: rev_to).first
     end
     changeset_from.filechanges.each() do |change_from|
       revision_from = nil
@@ -137,10 +135,7 @@ class Repository::Cvs < Repository
         # only add the change to the database, if it doen't exists. the cvs log
         # is not exclusive at all.
         tmp_time = revision.time.clone
-        unless filechanges.find_by_path_and_revision(
-                                scm.with_leading_slash(revision.paths[0][:path]),
-                                revision.paths[0][:revision]
-                             )
+        unless filechanges.where(path: scm.with_leading_slash(revision.paths[0][:path]), revision: revision.paths[0][:revision]).first
           cmt = Changeset.normalize_comments(revision.message, repo_log_encoding)
           author_utf8 = Changeset.to_utf8(revision.author, repo_log_encoding)
           cs  = changesets.where(

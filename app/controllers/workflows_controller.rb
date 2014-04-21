@@ -78,12 +78,12 @@ class WorkflowsController < ApplicationController
     if params[:source_tracker_id].blank? || params[:source_tracker_id] == 'any'
       @source_tracker = nil
     else
-      @source_tracker = Tracker.find_by_id(params[:source_tracker_id].to_i)
+      @source_tracker = Tracker.find(params[:source_tracker_id].to_i)
     end
     if params[:source_role_id].blank? || params[:source_role_id] == 'any'
       @source_role = nil
     else
-      @source_role = Role.find_by_id(params[:source_role_id].to_i)
+      @source_role = Role.find(params[:source_role_id].to_i)
     end
     @target_trackers = params[:target_tracker_ids].blank? ?
         nil : Tracker.where(:id => params[:target_tracker_ids]).all

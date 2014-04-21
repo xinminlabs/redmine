@@ -101,7 +101,7 @@ class Member < ActiveRecord::Base
     project_id = project.is_a?(Project) ? project.id : project
     principal_id = principal.is_a?(Principal) ? principal.id : principal
 
-    member = Member.find_by_project_id_and_user_id(project_id, principal_id)
+    member = Member.where(project_id: project_id, user_id: principal_id).first
     member ||= Member.new(:project_id => project_id, :user_id => principal_id)
     member
   end

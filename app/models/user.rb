@@ -171,7 +171,7 @@ class User < Principal
 
     # Make sure no one can sign in with an empty login or password
     return nil if login.empty? || password.empty?
-    user = find_by_login(login)
+    user = where(login: login).first
     if user
       # user is already in local database
       return nil unless user.check_password?(password)
@@ -411,7 +411,7 @@ class User < Principal
 
   # Returns true if the default admin account can no longer be used
   def self.default_admin_account_changed?
-    !User.active.find_by_login("admin").try(:check_password?, "admin")
+    !User.active.where(login: "admin").first.try(:check_password?, "admin")
   end
 
   def to_s

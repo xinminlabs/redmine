@@ -60,7 +60,7 @@ class Journal < ActiveRecord::Base
       if detail.property == 'cf'
         detail.custom_field && detail.custom_field.visible_by?(project, user)
       elsif detail.property == 'relation'
-        Issue.find_by_id(detail.value || detail.old_value).try(:visible?, user)
+        Issue.find(detail.value || detail.old_value).try(:visible?, user)
       else
         true
       end
@@ -89,7 +89,7 @@ class Journal < ActiveRecord::Base
   # Returns the new status if the journal contains a status change, otherwise nil
   def new_status
     s = new_value_for('status_id')
-    s ? IssueStatus.find_by_id(s.to_i) : nil
+    s ? IssueStatus.find(s.to_i) : nil
   end
 
   def new_value_for(prop)

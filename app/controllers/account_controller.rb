@@ -82,7 +82,7 @@ class AccountController < ApplicationController
       return
     else
       if request.post?
-        user = User.find_by_mail(params[:mail].to_s)
+        user = User.where(mail: params[:mail].to_s).first
         # user not found
         unless user
           flash.now[:error] = l(:notice_account_unknown_email)
@@ -168,7 +168,7 @@ class AccountController < ApplicationController
   def activation_email
     if session[:registered_user_id] && Setting.self_registration == '1'
       user_id = session.delete(:registered_user_id).to_i
-      user = User.find_by_id(user_id)
+      user = User.find(user_id)
       if user && user.registered?
         register_by_email_activation(user)
         return
@@ -211,7 +211,7 @@ class AccountController < ApplicationController
           :return_to => back_url, :method => :post
     ) do |result, identity_url, registration|
       if result.successful?
-        user = User.find_or_initialize_by_identity_url(identity_url)
+        user = User.find_or_initialize_by(identity_url: identity_url)
         if user.new_record?
           # Self-registration off
           (redirect_to(home_url); return) unless Setting.self_registration?

@@ -147,9 +147,9 @@ class Repository < ActiveRecord::Base
 
   def self.find_by_identifier_param(param)
     if param.to_s =~ /^\d+$/
-      find_by_id(param)
+      find(param
     else
-      find_by_identifier(param)
+      where(identifier: param).first
     end
   end
 
@@ -318,8 +318,8 @@ class Repository < ActiveRecord::Base
         user = c.user
       elsif committer.strip =~ /^([^<]+)(<(.*)>)?$/
         username, email = $1.strip, $3
-        u = User.find_by_login(username)
-        u ||= User.find_by_mail(email) unless email.blank?
+        u = User.where(login: username).first
+        u ||= User.where(mail: email).first unless email.blank?
         user = u
       end
       @found_committer_users[committer] = user

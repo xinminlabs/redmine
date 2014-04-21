@@ -83,7 +83,7 @@ class WatchersController < ApplicationController
       @watched = klass.find(params[:object_id])
       @project = @watched.project
     elsif params[:project_id]
-      @project = Project.visible.find_by_param(params[:project_id])
+      @project = Project.visible.where(param: params[:project_id]).first
     end
   rescue
     render_404

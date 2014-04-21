@@ -84,7 +84,7 @@ class ProjectsController < ApplicationController
       @project.set_allowed_parent!(params[:project]['parent_id']) if params[:project].has_key?('parent_id')
       # Add current user as a project member if current user is not admin
       unless User.current.admin?
-        r = Role.givable.find_by_id(Setting.new_project_user_role_id.to_i) || Role.givable.first
+        r = Role.givable.find(Setting.new_project_user_role_id.to_i) || Role.givable.first
         m = Member.new(:user => User.current, :roles => [r])
         @project.members << m
       end
@@ -251,7 +251,7 @@ class ProjectsController < ApplicationController
     return true if User.current.admin?
     parent_id = params[:project] && params[:project][:parent_id]
     if parent_id || @project.new_record?
-      parent = parent_id.blank? ? nil : Project.find_by_id(parent_id.to_i)
+      parent = parent_id.blank? ? nil : Project.find(parent_id.to_i)
       unless @project.allowed_parents.include?(parent)
         @project.errors.add :parent_id, :invalid
         return false

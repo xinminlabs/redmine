@@ -76,7 +76,7 @@ class Wiki < ActiveRecord::Base
     project = options[:project]
     if title.to_s =~ %r{^([^\:]+)\:(.*)$}
       project_identifier, title = $1, $2
-      project = Project.find_by_identifier(project_identifier) || Project.find_by_name(project_identifier)
+      project = Project.where(identifier: project_identifier).first || Project.where(name: project_identifier).first
     end
     if project && project.wiki
       page = project.wiki.find_page(title)

@@ -102,7 +102,7 @@ class MailHandler < ActionMailer::Base
         end
       end
     end
-    @user = User.find_by_mail(sender_email) if sender_email.present?
+    @user = User.where(mail: sender_email).first if sender_email.present?
     if @user && !@user.active?
       if logger
         logger.info  "MailHandler: ignoring email from non-active user [#{@user.login}]"
@@ -209,7 +209,7 @@ class MailHandler < ActionMailer::Base
 
   # Adds a note to an existing issue
   def receive_issue_reply(issue_id, from_journal=nil)
-    issue = Issue.find_by_id(issue_id)
+    issue = Issue.find(issue_id)
     return unless issue
     # check permission
     unless @@handler_options[:no_permission_check]
@@ -240,7 +240,7 @@ class MailHandler < ActionMailer::Base
 
   # Reply will be added to the issue
   def receive_journal_reply(journal_id)
-    journal = Journal.find_by_id(journal_id)
+    journal = Journal.find(journal_id)
     if journal && journal.journalized_type == 'Issue'
       receive_issue_reply(journal.journalized_id, journal)
     end
@@ -248,7 +248,7 @@ class MailHandler < ActionMailer::Base
 
   # Receives a reply to a forum message
   def receive_message_reply(message_id)
-    message = Message.find_by_id(message_id)
+    message = Message.find(message_id)
     if message
       message = message.root
 
@@ -355,12 +355,12 @@ class MailHandler < ActionMailer::Base
     # TODO: other ways to specify project:
     # * parse the email To field
     # * specific project (eg. Setting.mail_handler_target_project)
-    target = Project.find_by_identifier(get_keyword(:project))
+    target = Project.where(identifier: get_keyword(:project)).first
     if target.nil?
       # Invalid project keyword, use the project specified as the default one
       default_project = @@handler_options[:issue][:project]
       if default_project.present?
-        target = Project.find_by_identifier(default_project)
+        target = Project.where(identifier: default_project).first
       end
     end
     raise MissingInformation.new('Unable to determine target project') if target.nil?

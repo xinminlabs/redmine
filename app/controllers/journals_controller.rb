@@ -48,7 +48,7 @@ class JournalsController < ApplicationController
   def diff
     @issue = @journal.issue
     if params[:detail_id].present?
-      @detail = @journal.details.find_by_id(params[:detail_id])
+      @detail = @journal.details.find(params[:detail_id])
     else
       @detail = @journal.details.detect {|d| d.prop_key == 'description'}
     end

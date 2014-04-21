@@ -90,7 +90,7 @@ module TimelogHelper
     if value.blank?
       "[#{l(:label_none)}]"
     elsif k = criteria_options[:klass]
-      obj = k.find_by_id(value.to_i)
+      obj = k.find(value.to_i)
       if obj.is_a?(Issue)
         obj.visible? ? "#{obj.tracker} ##{obj.id}: #{obj.subject}" : "##{obj.id}"
       else

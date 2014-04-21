@@ -675,7 +675,7 @@ module ApplicationHelper
       if esc.nil?
         if page =~ /^([^\:]+)\:(.*)$/
           identifier, page = $1, $2
-          link_project = Project.find_by_identifier(identifier) || Project.find_by_name(identifier)
+          link_project = Project.where(identifier: identifier).first || Project.where(name: identifier).first
           title ||= identifier if page.blank?
         end
 
@@ -753,7 +753,7 @@ module ApplicationHelper
       link = nil
       project = default_project
       if project_identifier
-        project = Project.visible.find_by_identifier(project_identifier)
+        project = Project.visible.where(identifier: project_identifier).first
       end
       if esc.nil?
         if prefix.nil? && sep == 'r'
@@ -766,8 +766,7 @@ module ApplicationHelper
             end
             # project.changesets.visible raises an SQL error because of a double join on repositories
             if repository &&
-                 (changeset = Changeset.visible.
-                                  find_by_repository_id_and_revision(repository.id, identifier))
+                 (changeset = Changeset.visible.where(repository_id: repository.id, revision: identifier).first)
               link = link_to(h("#{project_prefix}#{repo_prefix}r#{identifier}"),
                              {:only_path => only_path, :controller => 'repositories',
                               :action => 'revision', :id => project,
@@ -782,7 +781,7 @@ module ApplicationHelper
           case prefix
           when nil
             if oid.to_s == identifier &&
-                  issue = Issue.visible.includes(:status).find_by_id(oid)
+                  issue = Issue.visible.includes(:status).find(oid)
               anchor = comment_id ? "note-#{comment_id}" : nil
               link = link_to(h("##{oid}#{comment_suffix}"),
                              {:only_path => only_path, :controller => 'issues',
@@ -791,31 +790,31 @@ module ApplicationHelper
                              :title => "#{issue.subject.truncate(100)} (#{issue.status.name})")
             end
           when 'document'
-            if document = Document.visible.find_by_id(oid)
+            if document = Document.visible.find(oid)
               link = link_to h(document.title), {:only_path => only_path, :controller => 'documents', :action => 'show', :id => document},
                                                 :class => 'document'
             end
           when 'version'
-            if version = Version.visible.find_by_id(oid)
+            if version = Version.visible.find(oid)
               link = link_to h(version.name), {:only_path => only_path, :controller => 'versions', :action => 'show', :id => version},
                                               :class => 'version'
             end
           when 'message'
-            if message = Message.visible.includes(:parent).find_by_id(oid)
+            if message = Message.visible.includes(:parent).find(oid)
               link = link_to_message(message, {:only_path => only_path}, :class => 'message')
             end
           when 'forum'
-            if board = Board.visible.find_by_id(oid)
+            if board = Board.visible.find(oid)
               link = link_to h(board.name), {:only_path => only_path, :controller => 'boards', :action => 'show', :id => board, :project_id => board.project},
                                              :class => 'board'
             end
           when 'news'
-            if news = News.visible.find_by_id(oid)
+            if news = News.visible.find(oid)
               link = link_to h(news.title), {:only_path => only_path, :controller => 'news', :action => 'show', :id => news},
                                             :class => 'news'
             end
           when 'project'
-            if p = Project.visible.find_by_id(oid)
+            if p = Project.visible.find(oid)
               link = link_to_project(p, {:only_path => only_path}, :class => 'project')
             end
           end
@@ -824,22 +823,22 @@ module ApplicationHelper
           name = identifier.gsub(%r{^"(.*)"$}, "\\1")
           case prefix
           when 'document'
-            if project && document = project.documents.visible.find_by_title(name)
+            if project && document = project.documents.visible.where(title: name).first
               link = link_to h(document.title), {:only_path => only_path, :controller => 'documents', :action => 'show', :id => document},
                                                 :class => 'document'
             end
           when 'version'
-            if project && version = project.versions.visible.find_by_name(name)
+            if project && version = project.versions.visible.where(name: name).first
               link = link_to h(version.name), {:only_path => only_path, :controller => 'versions', :action => 'show', :id => version},
                                               :class => 'version'
             end
           when 'forum'
-            if project && board = project.boards.visible.find_by_name(name)
+            if project && board = project.boards.visible.where(name: name).first
               link = link_to h(board.name), {:only_path => only_path, :controller => 'boards', :action => 'show', :id => board, :project_id => board.project},
                                              :class => 'board'
             end
           when 'news'
-            if project && news = project.news.visible.find_by_title(name)
+            if project && news = project.news.visible.where(title: name).first
               link = link_to h(news.title), {:only_path => only_path, :controller => 'news', :action => 'show', :id => news},
                                             :class => 'news'
             end

@@ -173,7 +173,7 @@ module QueriesHelper
     else
       # retrieve from session
       @query = nil
-      @query = IssueQuery.find_by_id(session[:query][:id]) if session[:query][:id]
+      @query = IssueQuery.find(session[:query][:id]) if session[:query][:id]
       @query ||= IssueQuery.new(:name => "_", :filters => session[:query][:filters], :group_by => session[:query][:group_by], :column_names => session[:query][:column_names])
       @query.project = @project
     end
@@ -182,7 +182,7 @@ module QueriesHelper
   def retrieve_query_from_session
     if session[:query]
       if session[:query][:id]
-        @query = IssueQuery.find_by_id(session[:query][:id])
+        @query = IssueQuery.find(session[:query][:id])
         return unless @query
       else
         @query = IssueQuery.new(:name => "_", :filters => session[:query][:filters], :group_by => session[:query][:group_by], :column_names => session[:query][:column_names])

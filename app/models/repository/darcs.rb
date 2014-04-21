@@ -41,14 +41,14 @@ class Repository::Darcs < Repository
   end
 
   def entry(path=nil, identifier=nil)
-    patch = identifier.nil? ? nil : changesets.find_by_revision(identifier)
+    patch = identifier.nil? ? nil : changesets.where(revision: identifier).first
     scm.entry(path, patch.nil? ? nil : patch.scmid)
   end
 
   def scm_entries(path=nil, identifier=nil)
     patch = nil
     if ! identifier.nil?
-      patch = changesets.find_by_revision(identifier)
+      patch = changesets.where(revision: identifier).first
       return nil if patch.nil?
     end
     entries = scm.entries(path, patch.nil? ? nil : patch.scmid)
@@ -56,7 +56,7 @@ class Repository::Darcs < Repository
       entries.each do |entry|
         # Search the DB for the entry's last change
         if entry.lastrev && !entry.lastrev.scmid.blank?
-          changeset = changesets.find_by_scmid(entry.lastrev.scmid)
+          changeset = changesets.where(scmid: entry.lastrev.scmid).first
         end
         if changeset
           entry.lastrev.identifier = changeset.revision
@@ -71,14 +71,14 @@ class Repository::Darcs < Repository
   protected :scm_entries
 
   def cat(path, identifier=nil)
-    patch = identifier.nil? ? nil : changesets.find_by_revision(identifier.to_s)
+    patch = identifier.nil? ? nil : changesets.where(revision: identifier.to_s).first
     scm.cat(path, patch.nil? ? nil : patch.scmid)
   end
 
   def diff(path, rev, rev_to)
-    patch_from = changesets.find_by_revision(rev)
+    patch_from = changesets.where(revision: rev).first
     return nil if patch_from.nil?
-    patch_to = changesets.find_by_revision(rev_to) if rev_to
+    patch_to = changesets.where(revision: rev_to).first if rev_to
     if path.blank?
       path = patch_from.filechanges.collect{|change| change.path}.join(' ')
     end
@@ -92,7 +92,7 @@ class Repository::Darcs < Repository
       next_rev   = latest_changeset ? latest_changeset.revision.to_i + 1 : 1
       # latest revision in the repository
       scm_revision = scm_info.lastrev.scmid
-      unless changesets.find_by_scmid(scm_revision)
+      unless changesets.where(scmid: scm_revision).first
         revisions = scm.revisions('', db_last_id, nil, :with_path => true)
         transaction do
           revisions.reverse_each do |revision|

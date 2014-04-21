@@ -40,7 +40,7 @@ class SearchController < ApplicationController
     begin; offset = params[:offset].to_time if params[:offset]; rescue; end
 
     # quick jump to an issue
-    if (m = @question.match(/^#?(\d+)$/)) && (issue = Issue.visible.find_by_id(m[1].to_i))
+    if (m = @question.match(/^#?(\d+)$/)) && (issue = Issue.visible.find(m[1].to_i))
       redirect_to issue_path(issue)
       return
     end

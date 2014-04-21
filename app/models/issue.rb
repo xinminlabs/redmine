@@ -298,7 +298,7 @@ class Issue < ActiveRecord::Base
 
   def project_id=(project_id)
     if project_id.to_s != self.project_id.to_s
-      self.project = (project_id.present? ? Project.find_by_id(project_id) : nil)
+      self.project = (project_id.present? ? Project.find(project_id) : nil)
     end
   end
 
@@ -314,7 +314,7 @@ class Issue < ActiveRecord::Base
       end
       # Reassign to the category with same name if any
       if category
-        self.category = project.issue_categories.find_by_name(category.name)
+        self.category = project.issue_categories.where(name: category.name).first
       end
       # Keep the fixed_version if it's still valid in the new_project
       if fixed_version && fixed_version.project != project && !project.shared_versions.include?(fixed_version)
@@ -668,7 +668,7 @@ class Issue < ActiveRecord::Base
   # Returns nil for a new issue
   def status_was
     if status_id_was && status_id_was.to_i > 0
-      @status_was ||= IssueStatus.find_by_id(status_id_was)
+      @status_was ||= IssueStatus.find(status_id_was)
     end
   end
 
@@ -680,8 +680,8 @@ class Issue < ActiveRecord::Base
   # Return true if the issue is being reopened
   def reopened?
     if !new_record? && status_id_changed?
-      status_was = IssueStatus.find_by_id(status_id_was)
-      status_new = IssueStatus.find_by_id(status_id)
+      status_was = IssueStatus.find(status_id_was)
+      status_new = IssueStatus.find(status_id)
       if status_was && status_new && status_was.is_closed? && !status_new.is_closed?
         return true
       end
@@ -757,7 +757,7 @@ class Issue < ActiveRecord::Base
       if new_record?
         initial_status = IssueStatus.default
       elsif status_id_was
-        initial_status = IssueStatus.find_by_id(status_id_was)
+        initial_status = IssueStatus.find(status_id_was)
       end
       initial_status ||= status
 
@@ -783,7 +783,7 @@ class Issue < ActiveRecord::Base
     # assigned_to_id_was is reset before after_save callbacks
     user_id = @previous_assigned_to_id || assigned_to_id_was
     if user_id && user_id != assigned_to_id
-      @assigned_to_was ||= User.find_by_id(user_id)
+      @assigned_to_was ||= User.find(user_id)
     end
   end
 
@@ -1115,7 +1115,7 @@ class Issue < ActiveRecord::Base
 
   def parent_issue_id=(arg)
     s = arg.to_s.strip.presence
-    if s && (m = s.match(%r{\A#?(\d+)\z})) && (@parent_issue = Issue.find_by_id(m[1]))
+    if s && (m = s.match(%r{\A#?(\d+)\z})) && (@parent_issue = Issue.find(m[1]))
       @parent_issue.id
       @invalid_parent_issue_id = nil
     elsif s.blank?
@@ -1344,10 +1344,10 @@ class Issue < ActiveRecord::Base
   end
 
   def recalculate_attributes_for(issue_id)
-    if issue_id && p = Issue.find_by_id(issue_id)
+    if issue_id && p = Issue.find(issue_id)
       # priority = highest priority of children
       if priority_position = p.children.joins(:priority).maximum("#{IssuePriority.table_name}.position")
-        p.priority = IssuePriority.find_by_position(priority_position)
+        p.priority = IssuePriority.where(position: priority_position).first
       end
 
       # start/due dates = lowest/highest dates of children

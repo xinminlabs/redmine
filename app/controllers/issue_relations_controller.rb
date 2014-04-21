@@ -43,7 +43,7 @@ class IssueRelationsController < ApplicationController
     @relation = IssueRelation.new(params[:relation])
     @relation.issue_from = @issue
     if params[:relation] && m = params[:relation][:issue_to_id].to_s.strip.match(/^#?(\d+)$/)
-      @relation.issue_to = Issue.visible.find_by_id(m[1].to_i)
+      @relation.issue_to = Issue.visible.find(m[1].to_i)
     end
     saved = @relation.save
 

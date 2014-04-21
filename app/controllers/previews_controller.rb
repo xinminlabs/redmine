@@ -19,7 +19,7 @@ class PreviewsController < ApplicationController
   before_filter :find_project, :find_attachments
 
   def issue
-    @issue = @project.issues.find_by_id(params[:id]) unless params[:id].blank?
+    @issue = @project.issues.find(params[:id]) unless params[:id].blank?
     if @issue
       @description = params[:issue] && params[:issue][:description]
       if @description && @description.gsub(/(\r?\n|\n\r?)/, "\n") == @issue.description.to_s.gsub(/(\r?\n|\n\r?)/, "\n")
@@ -34,7 +34,7 @@ class PreviewsController < ApplicationController
   end
 
   def news
-    if params[:id].present? && news = News.visible.find_by_id(params[:id])
+    if params[:id].present? && news = News.visible.find(params[:id])
       @previewed = news
     end
     @text = (params[:news] ? params[:news][:description] : nil)

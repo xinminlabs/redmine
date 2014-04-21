@@ -259,7 +259,7 @@ class Changeset < ActiveRecord::Base
 
   def log_time_activity
     if Setting.commit_logtime_activity_id.to_i > 0
-      TimeEntryActivity.find_by_id(Setting.commit_logtime_activity_id.to_i)
+      TimeEntryActivity.find(Setting.commit_logtime_activity_id.to_i)
     end
   end
 

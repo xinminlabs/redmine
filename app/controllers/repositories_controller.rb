@@ -243,7 +243,7 @@ class RepositoriesController < ApplicationController
   # Removes a related issue from a changeset
   # DELETE /projects/:project_id/repository/(:repository_id/)revisions/:rev/issues/:issue_id
   def remove_related_issue
-    @issue = Issue.visible.find_by_id(params[:issue_id])
+    @issue = Issue.visible.find(params[:issue_id])
     if @issue
       @changeset.issues.delete(@issue)
     end
@@ -313,7 +313,7 @@ class RepositoriesController < ApplicationController
   def find_project_repository
     @project = Project.find(params[:id])
     if params[:repository_id].present?
-      @repository = @project.repositories.find_by_identifier_param(params[:repository_id])
+      @repository = @project.repositories.where(identifier_param: params[:repository_id]).first
     else
       @repository = @project.repository
     end

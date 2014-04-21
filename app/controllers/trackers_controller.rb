@@ -44,7 +44,7 @@ class TrackersController < ApplicationController
     @tracker = Tracker.new(params[:tracker])
     if @tracker.save
       # workflow copy
-      if !params[:copy_workflow_from].blank? && (copy_from = Tracker.find_by_id(params[:copy_workflow_from]))
+      if !params[:copy_workflow_from].blank? && (copy_from = Tracker.find(params[:copy_workflow_from]))
         @tracker.workflow_rules.copy(copy_from)
       end
       flash[:notice] = l(:notice_successful_create)
@@ -84,7 +84,7 @@ class TrackersController < ApplicationController
   def fields
     if request.post? && params[:trackers]
       params[:trackers].each do |tracker_id, tracker_params|
-        tracker = Tracker.find_by_id(tracker_id)
+        tracker = Tracker.find(tracker_id)
         if tracker
           tracker.core_fields = tracker_params[:core_fields]
           tracker.custom_field_ids = tracker_params[:custom_field_ids]
